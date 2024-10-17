@@ -1,0 +1,229 @@
+class Program
+{
+    static void Main()
+    {
+        RobotPemotong RP1 = new RobotPemotong("T-X", 200, 45, 45);
+        RobotPenembak RT1 = new RobotPenembak("T-3000", 300, 50, 25);
+        BosRobot bos = new BosRobot("Optimus Prime", 500, 70, 35);
+
+        IKemampuan perbaikan = new Perbaikan();
+        IKemampuan seranglistrik = new SeranganListrik();
+        IKemampuan seranganplasma = new SeranganPlasma();
+        IKemampuan shield = new PertahananSuper();
+
+        //RP1.CetakInformasi();
+        //RT1.CetakInformasi();
+        //bos.CetakInformasi();
+
+
+        RP1.Serang(bos);
+        Console.WriteLine("\nDetail terkini mengenai robot yang diserang : ");
+        bos.CetakInformasi();
+
+        Console.WriteLine();
+        RP1.Serang(RT1);
+        Console.WriteLine("\nDetail terkini mengenai robot yang diserang");
+        RT1.CetakInformasi();
+
+        Console.WriteLine();
+        bos.Serang(RT1);
+        RT1.GunakanKemampuan(shield);
+        RT1.GunakanKemampuan(seranganplasma);
+        Console.WriteLine("\nDetail terkini mengenai robot yang diserang");
+        RT1.CetakInformasi();
+
+        Console.WriteLine();
+        bos.Serang(RP1);
+        bos.GunakanKemampuan(seranglistrik);
+        Console.WriteLine("\nDetail terkini mengenai robot yang diserang");
+        RP1.CetakInformasi();
+
+        Console.WriteLine();
+        bos.Mati();
+
+
+    }
+}
+
+abstract class Robot
+{
+    public string Nama;
+    public int Energi, Armor, Serangan;
+
+    public Robot(string nama, int energi, int armor, int serangan)
+    {
+        this.Nama = nama;
+        this.Energi = energi;
+        this.Armor = armor;
+        this.Serangan = serangan;
+    }
+
+    public virtual void Serang(Robot target)
+    {
+        Console.WriteLine($"{target.Nama} diserang {Nama}!");
+        int kerusakan = (Serangan - target.Armor);
+        target.Energi += kerusakan;
+        Console.WriteLine($"{target.Nama} menerima serangan sebesar {kerusakan}. Energi {target.Nama} tersisa: {target.Energi}");
+    }
+
+    public abstract void GunakanKemampuan(IKemampuan kemampuan);
+ 
+    public void CetakInformasi()
+    {
+        Console.WriteLine($"\nRobot : {Nama}" +
+            $"\nEnergi : {Energi}" +
+            $"\nArmor : {Armor}" +
+            $"\nSerangan : {Serangan}");
+    }
+}
+
+
+class BosRobot : Robot
+{
+    public BosRobot(string nama, int energi, int armor, int serangan) : base (nama, energi, armor, serangan)
+    {
+        
+    }
+
+    public override void GunakanKemampuan(IKemampuan kemampuan)
+    {
+        if (!kemampuan.Pemulihan())
+        {
+            Console.WriteLine($"{Nama} menggunakan kemampuan {kemampuan.GetType().Name}");
+            kemampuan.Gunakan(this);
+        }
+        else
+        {
+            Console.WriteLine("Kemampuan sedang dipulihkan!");
+        }
+    }
+
+    public void Diserang(Robot penyerang)
+    {
+        Serang(penyerang);
+    }
+
+    public void Mati()
+    {
+        if (Energi <= 0)
+        {
+            Console.WriteLine($"{Nama} mati!");
+        }
+
+        else
+        {
+            Console.WriteLine($"energi yang dimiliki {Nama} masih ada, {Nama} masih hidup!");
+        }
+    }
+}
+
+class RobotPenembak : Robot
+{
+    public RobotPenembak(string nama, int energi, int armor, int serangan) : base(nama, energi, armor, serangan)
+    {
+
+    }
+
+    public override void GunakanKemampuan(IKemampuan kemampuan)
+    {
+        if (!kemampuan.Pemulihan())
+        {
+            Console.WriteLine($"{Nama} menggunakan kemampuan {kemampuan.GetType().Name}.");
+            kemampuan.Gunakan(this);
+        }
+        else
+        {
+            Console.WriteLine("Kemampuan sedang dipulihkan!");
+        }
+    }
+}
+
+class RobotPemotong : Robot
+{
+    public RobotPemotong(string nama, int energi, int armor, int serangan) : base(nama, energi, armor, serangan)
+    {
+
+    }
+
+    public override void GunakanKemampuan(IKemampuan kemampuan)
+    {
+        if (!kemampuan.Pemulihan())
+        {
+            Console.WriteLine($"{Nama} menggunakan kemampuan {kemampuan.GetType().Name}.");
+            kemampuan.Gunakan(this);
+        }
+        else
+        {
+            Console.WriteLine("Kemampuan sedang dipulihkan!");
+        }
+    }
+}
+
+interface IKemampuan
+{
+    void Gunakan(Robot robot);
+    bool Pemulihan();
+}
+
+class Perbaikan : IKemampuan
+{
+    private bool pemulihan = false;
+    public void Gunakan(Robot robot)
+    {
+        robot.Energi += 20;
+        Console.WriteLine($"{robot.Nama} melakukan perbaikan, energi bertambah menjadi {robot.Energi}");
+        pemulihan = true;
+    }
+
+    public bool Pemulihan()
+    {
+        return pemulihan;
+    }
+}
+
+class SeranganListrik : IKemampuan
+{
+    private bool pemulihan = false;
+    public void Gunakan(Robot robot)
+    {
+        Console.WriteLine($"{robot.Nama} menyerang menggunakan serangan listrik!");
+        pemulihan = true;
+    }
+
+    public bool Pemulihan()
+    {
+        return pemulihan;
+    }
+}
+
+class SeranganPlasma : IKemampuan
+{
+    private bool pemulihan = false;
+    public void Gunakan(Robot robot)
+    {
+        Console.WriteLine($"{robot.Nama} menembakkan tembakan Plasma!");
+        pemulihan = true;
+    }
+
+    public bool Pemulihan()
+    {
+        return pemulihan;
+    }
+}
+
+class PertahananSuper : IKemampuan
+{
+    private bool pemulihan = false;
+    public void Gunakan(Robot robot)
+    {
+        robot.Armor += 25; 
+        Console.WriteLine($"{robot.Nama} menggunakan shield. ketahanan armor bertambah menjadi {robot.Armor}");
+        pemulihan = true;
+    }
+
+    public bool Pemulihan()
+    {
+        return pemulihan;
+    }
+}
+
